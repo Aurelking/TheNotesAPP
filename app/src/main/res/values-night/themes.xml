@@ -1,7 +1,61 @@
+<?xml version="1.0" encoding="utf-8"?>
 <resources xmlns:tools="http://schemas.android.com/tools">
     <!-- Base application theme. -->
     <style name="Base.Theme.TheNotesApp" parent="Theme.Material3.DayNight.NoActionBar">
         <!-- Customize your dark theme here. -->
         <!-- <item name="colorPrimary">@color/my_dark_primary</item> -->
+    </style>
+
+    <!-- Dark theme -->
+    <style name="Theme.TheNotesApp" parent="Theme.MaterialComponents.DayNight.NoActionBar">
+        <!-- Couleurs primaires -->
+        <item name="colorPrimary">@color/primary</item>
+        <item name="colorPrimaryDark">@color/primary_dark</item>
+        <item name="colorAccent">@color/accent</item>
+        
+        <!-- Couleurs de fond -->
+        <item name="android:colorBackground">@color/dark_background</item>
+        <item name="colorSurface">@color/dark_surface</item>
+        
+        <!-- Couleurs de texte -->
+        <item name="android:textColorPrimary">@color/dark_text_primary</item>
+        <item name="android:textColorSecondary">@color/dark_text_secondary</item>
+
+        <!-- Attributs personnalisés -->
+        <item name="priorityNormalColor">@color/priority_normal</item>
+        <item name="priorityImportantColor">@color/priority_important</item>
+        <item name="priorityUrgentColor">@color/priority_urgent</item>
+    </style>
+
+    <!-- Override specific styles for dark theme -->
+    <style name="Widget.TheNotesApp.CardView" parent="Widget.MaterialComponents.CardView">
+        <item name="cardElevation">2dp</item>
+        <item name="cardCornerRadius">8dp</item>
+        <item name="android:layout_margin">4dp</item>
+        <item name="cardBackgroundColor">@color/dark_surface</item>
+    </style>
+
+    <style name="TextAppearance.TheNotesApp.Title" parent="TextAppearance.MaterialComponents.Headline6">
+        <item name="android:textSize">18sp</item>
+        <item name="android:textColor">@color/dark_text_primary</item>
+    </style>
+
+    <style name="TextAppearance.TheNotesApp.Content" parent="TextAppearance.MaterialComponents.Body2">
+        <item name="android:textSize">14sp</item>
+        <item name="android:textColor">@color/dark_text_primary</item>
+        <item name="android:maxLines">3</item>
+        <item name="android:ellipsize">end</item>
+    </style>
+
+    <style name="TextAppearance.TheNotesApp.Metadata" parent="TextAppearance.MaterialComponents.Caption">
+        <item name="android:textSize">12sp</item>
+        <item name="android:textColor">@color/dark_text_secondary</item>
+    </style>
+
+    <style name="Widget.TheNotesApp.Chip" parent="Widget.MaterialComponents.Chip.Choice">
+        <item name="chipBackgroundColor">@color/dark_chip_background_color</item>
+        <item name="android:textColor">@color/dark_chip_text_color</item>
+        <item name="chipStrokeWidth">1dp</item>
+        <item name="chipStrokeColor">@color/dark_chip_stroke_color</item>
     </style>
 </resources>

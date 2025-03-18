@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="Theme.TheNotesApp.PopupOverlay" parent="ThemeOverlay.MaterialComponents.Light" />
+    
+    <style name="Theme.TheNotesApp.AppBarOverlay" parent="ThemeOverlay.MaterialComponents.Dark.ActionBar" />
+</resources> 

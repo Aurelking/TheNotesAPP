@@ -1,100 +1,136 @@
 package com.example.thenotesapp.fragments
 
-import android.app.AlertDialog
 import android.os.Bundle
-import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
-import android.view.Menu
-import android.view.MenuInflater
-import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Toast
-import androidx.core.view.MenuHost
-import androidx.core.view.MenuProvider
-import androidx.lifecycle.Lifecycle
-import androidx.navigation.findNavController
-import androidx.navigation.fragment.navArgs
-import com.example.thenotesapp.MainActivity
+import android.widget.ArrayAdapter
+import androidx.fragment.app.Fragment
+import androidx.lifecycle.ViewModelProvider
 import com.example.thenotesapp.R
 import com.example.thenotesapp.databinding.FragmentEditNoteBinding
 import com.example.thenotesapp.model.Note
-import com.example.thenotesapp.viewmodel.NoteViewModel
+import com.example.thenotesapp.viewmodels.NoteViewModel
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import java.util.*
 
-class EditNoteFragment : Fragment(R.layout.fragment_edit_note), MenuProvider {
+class EditNoteFragment : Fragment() {
 
-    private var editNoteBinding: FragmentEditNoteBinding? = null
-    private val binding get() = editNoteBinding!!
-
-    private lateinit var notesViewModel: NoteViewModel
-    private lateinit var currentNote: Note
-
-    private val args: EditNoteFragmentArgs by navArgs()
+    private var _binding: FragmentEditNoteBinding? = null
+    private val binding get() = _binding!!
+    private lateinit var noteViewModel: NoteViewModel
+    private var currentNote: Note? = null
 
     override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
+        inflater: LayoutInflater,
+        container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
-        // Inflate the layout for this fragment
-        editNoteBinding = FragmentEditNoteBinding.inflate(inflater, container, false)
+    ): View {
+        _binding = FragmentEditNoteBinding.inflate(inflater, container, false)
         return binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        noteViewModel = ViewModelProvider(requireActivity())[NoteViewModel::class.java]
 
-        val menuHost: MenuHost = requireActivity()
-        menuHost.addMenuProvider(this, viewLifecycleOwner, Lifecycle.State.RESUMED)
+        // Récupération de la note
+        arguments?.getParcelable<Note>("note")?.let { note ->
+            currentNote = note
+            loadNote(note)
+        }
 
-        notesViewModel = (activity as MainActivity).noteViewModel
-        currentNote = args.note!!
+        setupSpinners()
+        setupListeners()
+    }
 
-        binding.editNoteTitle.setText(currentNote.noteTitle)
-        binding.editNoteDesc.setText(currentNote.noteDesc)
+    private fun setupSpinners() {
+        // Configuration du spinner de catégorie
+        val categories = resources.getStringArray(R.array.note_categories)
+        val categoryAdapter = ArrayAdapter(requireContext(), android.R.layout.simple_spinner_item, categories)
+        categoryAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+        binding.categoryAutoComplete.setAdapter(categoryAdapter)
 
-        binding.editNoteFab.setOnClickListener {
-            val noteTitle = binding.editNoteTitle.text.toString().trim()
-            val noteDesc = binding.editNoteDesc.text.toString().trim()
+        // Configuration du spinner de priorité
+        val priorities = arrayOf("Normale", "Importante", "Urgente")
+        val priorityAdapter = ArrayAdapter(requireContext(), android.R.layout.simple_spinner_item, priorities)
+        priorityAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+        binding.priorityAutoComplete.setAdapter(priorityAdapter)
+    }
 
-            if (noteTitle.isNotEmpty()){
-                val note = Note(currentNote.id, noteTitle, noteDesc)
-                notesViewModel.updateNote(note)
-                view.findNavController().popBackStack(R.id.homeFragment, false)
-            } else {
-                Toast.makeText(context, " Please enter note title", Toast.LENGTH_SHORT).show()
-            }
+    private fun setupListeners() {
+        binding.addImageButton.setOnClickListener {
+            saveNote()
+        }
+
+        binding.addFileButton.setOnClickListener {
+            confirmDelete()
         }
     }
 
-    private fun deleteNote(){
-        AlertDialog.Builder(activity).apply {
-            setTitle("Delete Note")
-            setMessage("Do you want to delete this note?")
-            setPositiveButton("Delete"){_,_ ->
-                notesViewModel.deleteNote(currentNote)
-                Toast.makeText(context, " Note Deleted", Toast.LENGTH_SHORT).show()
-                view?.findNavController()?.popBackStack(R.id.homeFragment, false)
-            }
-            setNegativeButton("Cancel", null)
-        }.create().show()
-    }
-
-    override fun onCreateMenu(menu: Menu, menuInflater: MenuInflater) {
-        menu.clear()
-        menuInflater.inflate(R.menu.menu_edit_note, menu)
-    }
-
-    override fun onMenuItemSelected(menuItem: MenuItem): Boolean {
-        return when(menuItem.itemId){
-            R.id.deleteMenu -> {
-                deleteNote()
-                true
-            } else -> false
+    private fun loadNote(note: Note) {
+        binding.apply {
+            titleEditText.setText(note.title)
+            contentEditText.setText(note.content)
+            categoryAutoComplete.setText(note.category)
+            priorityAutoComplete.setText(when (note.priority) {
+                0 -> "Normale"
+                1 -> "Importante"
+                2 -> "Urgente"
+                else -> "Normale"
+            })
         }
     }
 
-    override fun onDestroy() {
-        super.onDestroy()
-        editNoteBinding = null
+    private fun saveNote() {
+        val title = binding.titleEditText.text.toString()
+        val content = binding.contentEditText.text.toString()
+        val category = binding.categoryAutoComplete.text.toString()
+        val priority = binding.priorityAutoComplete.text.toString().let { text ->
+            when (text) {
+                "Normale" -> 0
+                "Importante" -> 1
+                "Urgente" -> 2
+                else -> 0
+            }
+        }
+
+        if (title.isBlank()) {
+            binding.titleEditText.error = "Le titre est requis"
+            return
+        }
+
+        currentNote?.let { note ->
+            val updatedNote = note.copy(
+                title = title,
+                content = content,
+                category = category,
+                priority = priority,
+                modifiedDate = Date()
+            )
+            noteViewModel.updateNote(updatedNote)
+        }
+
+        // Retour au fragment précédent
+        requireActivity().onBackPressed()
+    }
+
+    private fun confirmDelete() {
+        currentNote?.let { note ->
+            MaterialAlertDialogBuilder(requireContext())
+                .setTitle("Supprimer la note")
+                .setMessage("Êtes-vous sûr de vouloir supprimer cette note ?")
+                .setPositiveButton("Supprimer") { _, _ ->
+                    noteViewModel.deleteNote(note)
+                    requireActivity().onBackPressed()
+                }
+                .setNegativeButton("Annuler", null)
+                .show()
+        }
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null
     }
 }

@@ -3,8 +3,33 @@
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <item
-        android:id="@+id/deleteMenu"
-        android:icon="@drawable/baseline_delete_24"
-        android:title=""
-        app:showAsAction="always"/>
+        android:id="@+id/action_save"
+        android:icon="@drawable/baseline_done_24"
+        android:title="Enregistrer"
+        app:showAsAction="always" />
+
+    <item
+        android:id="@+id/action_color"
+        android:icon="@drawable/ic_color"
+        android:title="Couleur"
+        app:showAsAction="ifRoom" />
+
+    <item
+        android:id="@+id/action_share"
+        android:icon="@drawable/ic_share"
+        android:title="Partager"
+        app:showAsAction="ifRoom" />
+
+    <item
+        android:id="@+id/action_pin"
+        android:icon="@drawable/ic_pin"
+        android:title="Épingler"
+        app:showAsAction="ifRoom" />
+
+    <item
+        android:id="@+id/action_archive"
+        android:icon="@drawable/ic_archive"
+        android:title="Archiver"
+        app:showAsAction="never" />
+
 </menu>

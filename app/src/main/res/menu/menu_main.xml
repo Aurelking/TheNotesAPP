@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <item
+        android:id="@+id/action_sort"
+        android:icon="@drawable/ic_sort"
+        android:title="Trier"
+        app:showAsAction="ifRoom">
+        <menu>
+            <item
+                android:id="@+id/sort_title"
+                android:title="Par titre" />
+            <item
+                android:id="@+id/sort_date_created"
+                android:title="Par date de création" />
+            <item
+                android:id="@+id/sort_date_modified"
+                android:title="Par date de modification" />
+            <item
+                android:id="@+id/sort_priority"
+                android:title="Par priorité" />
+            <item
+                android:id="@+id/sort_category"
+                android:title="Par catégorie" />
+        </menu>
+    </item>
+
+    <item
+        android:id="@+id/action_statistics"
+        android:icon="@drawable/ic_statistics"
+        android:title="Statistiques"
+        app:showAsAction="ifRoom" />
+
+    <item
+        android:id="@+id/action_export"
+        android:icon="@drawable/ic_export"
+        android:title="Exporter"
+        app:showAsAction="never" />
+
+    <item
+        android:id="@+id/action_theme"
+        android:icon="@drawable/ic_theme"
+        android:title="Thème"
+        app:showAsAction="never">
+        <menu>
+            <item
+                android:id="@+id/theme_light"
+                android:title="Mode clair" />
+            <item
+                android:id="@+id/theme_dark"
+                android:title="Mode sombre" />
+            <item
+                android:id="@+id/theme_system"
+                android:title="Système" />
+        </menu>
+    </item>
+</menu> 

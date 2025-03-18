@@ -1,5 +1,77 @@
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">Notes</string>
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
+
+    <!-- Menu principal -->
+    <string name="action_sort">Trier</string>
+    <string name="action_sort_title">Par titre</string>
+    <string name="action_sort_created">Par date de création</string>
+    <string name="action_sort_modified">Par date de modification</string>
+    <string name="action_sort_priority">Par priorité</string>
+    <string name="action_sort_category">Par catégorie</string>
+    <string name="action_statistics">Statistiques</string>
+    <string name="action_export">Exporter</string>
+    <string name="action_theme">Thème</string>
+    <string name="action_theme_light">Mode clair</string>
+    <string name="action_theme_dark">Mode sombre</string>
+    <string name="action_theme_system">Système</string>
+
+    <!-- Menu édition -->
+    <string name="action_save">Enregistrer</string>
+    <string name="action_color">Couleur</string>
+    <string name="action_pin">Épingler</string>
+    <string name="action_share">Partager</string>
+    <string name="action_archive">Archiver</string>
+    <string name="action_delete">Supprimer</string>
+
+    <!-- Écran principal -->
+    <string name="search_hint">Rechercher des notes…</string>
+    <string name="filter_all">Toutes</string>
+    <string name="filter_pinned">Épinglées</string>
+    <string name="filter_archived">Archivées</string>
+    <string name="filter_with_reminder">Avec rappel</string>
+    <string name="empty_notes">Aucune note</string>
+    <string name="add_note">Ajouter une note</string>
+
+    <!-- Édition de note -->
+    <string name="title_new_note">Nouvelle note</string>
+    <string name="title_edit_note">Modifier la note</string>
+    <string name="hint_title">Titre</string>
+    <string name="hint_content">Contenu</string>
+    <string name="hint_category">Catégorie</string>
+    <string name="hint_priority">Priorité</string>
+    <string name="label_reminder">Rappel</string>
+    <string name="label_attachments">Pièces jointes</string>
+    <string name="add_image">Ajouter une image</string>
+    <string name="add_file">Ajouter un fichier</string>
+    <string name="error_title_required">Le titre est requis</string>
+
+    <!-- Catégories -->
+    <string name="category_personal">Personnel</string>
+    <string name="category_work">Travail</string>
+    <string name="category_shopping">Courses</string>
+    <string name="category_ideas">Idées</string>
+
+    <!-- Priorités -->
+    <string name="priority_normal">Normale</string>
+    <string name="priority_important">Importante</string>
+    <string name="priority_urgent">Urgente</string>
+
+    <!-- Dialogues -->
+    <string name="dialog_delete_title">Supprimer la note</string>
+    <string name="dialog_delete_message">Êtes-vous sûr de vouloir supprimer cette note ?</string>
+    <string name="dialog_delete_attachment_title">Supprimer la pièce jointe</string>
+    <string name="dialog_delete_attachment_message">Êtes-vous sûr de vouloir supprimer cette pièce jointe ?</string>
+    <string name="dialog_statistics_title">Statistiques</string>
+    <string name="dialog_export_title">Exporter les notes</string>
+    <string name="dialog_button_ok">OK</string>
+    <string name="dialog_button_cancel">Annuler</string>
+    <string name="dialog_button_delete">Supprimer</string>
+
+    <!-- Messages -->
+    <string name="message_note_saved">Note enregistrée</string>
+    <string name="message_note_deleted">Note supprimée</string>
+    <string name="message_export_success">Notes exportées avec succès</string>
 </resources>

@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Attributs pour les couleurs de priorité -->
+    <attr name="priorityNormalColor" format="color"/>
+    <attr name="priorityImportantColor" format="color"/>
+    <attr name="priorityUrgentColor" format="color"/>
+</resources> 

@@ -1,119 +1,105 @@
 package com.example.thenotesapp.fragments
 
+import android.content.Intent
 import android.os.Bundle
+import android.view.*
 import androidx.fragment.app.Fragment
-import android.view.LayoutInflater
-import android.view.Menu
-import android.view.MenuInflater
-import android.view.MenuItem
-import android.view.View
-import android.view.ViewGroup
-import androidx.appcompat.widget.SearchView
-import androidx.core.view.MenuHost
-import androidx.core.view.MenuProvider
-import androidx.lifecycle.Lifecycle
-import androidx.navigation.findNavController
-import androidx.recyclerview.widget.StaggeredGridLayoutManager
-import com.example.thenotesapp.MainActivity
-import com.example.thenotesapp.R
+import androidx.lifecycle.ViewModelProvider
+import androidx.recyclerview.widget.LinearLayoutManager
+import com.example.thenotesapp.NoteDetailsActivity
 import com.example.thenotesapp.adapter.NoteAdapter
 import com.example.thenotesapp.databinding.FragmentHomeBinding
 import com.example.thenotesapp.model.Note
-import com.example.thenotesapp.viewmodel.NoteViewModel
+import com.example.thenotesapp.viewmodels.NoteViewModel
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 
-class HomeFragment : Fragment(R.layout.fragment_home), SearchView.OnQueryTextListener, MenuProvider {
+class HomeFragment : Fragment(), NoteAdapter.OnItemClickListener {
 
-    private var homeBinding: FragmentHomeBinding? = null
-    private val binding get() = homeBinding!!
-
-    private lateinit var notesViewModel : NoteViewModel
+    private var _binding: FragmentHomeBinding? = null
+    private val binding get() = _binding!!
+    private lateinit var noteViewModel: NoteViewModel
     private lateinit var noteAdapter: NoteAdapter
 
     override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
+        inflater: LayoutInflater,
+        container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
-        // Inflate the layout for this fragment
-        homeBinding = FragmentHomeBinding.inflate(inflater, container, false)
+    ): View {
+        _binding = FragmentHomeBinding.inflate(inflater, container, false)
         return binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        val menuHost: MenuHost = requireActivity()
-        menuHost.addMenuProvider(this, viewLifecycleOwner, Lifecycle.State.RESUMED)
-
-        notesViewModel = (activity as MainActivity).noteViewModel
-        setupHomeRecyclerView()
-
-        binding.addNoteFab.setOnClickListener {
-            it.findNavController().navigate(R.id.action_homeFragment_to_addNoteFragment)
-        }
+        setupRecyclerView()
+        setupViewModel()
     }
 
-    private fun updateUI(note: List<Note>?){
-        if (note != null){
-            if (note.isNotEmpty()){
-                binding.emptyNotesImage.visibility = View.GONE
-                binding.homeRecyclerView.visibility = View.VISIBLE
-            } else {
-                binding.emptyNotesImage.visibility = View.VISIBLE
-                binding.homeRecyclerView.visibility = View.GONE
-            }
-        }
-    }
-
-    private fun setupHomeRecyclerView(){
-        noteAdapter = NoteAdapter()
+    private fun setupRecyclerView() {
+        noteAdapter = NoteAdapter(this)
         binding.homeRecyclerView.apply {
-            layoutManager = StaggeredGridLayoutManager(2, StaggeredGridLayoutManager.VERTICAL)
-            setHasFixedSize(true)
             adapter = noteAdapter
+            layoutManager = LinearLayoutManager(requireContext())
         }
+    }
 
-        activity?.let {
-            notesViewModel.getAllNotes().observe(viewLifecycleOwner){ note ->
-                noteAdapter.differ.submitList(note)
-                updateUI(note)
+    private fun setupViewModel() {
+        noteViewModel = ViewModelProvider(requireActivity())[NoteViewModel::class.java]
+        noteViewModel.allNotes.observe(viewLifecycleOwner) { notes ->
+            noteAdapter.setNotes(notes)
+            binding.emptyNotesImage.visibility = if (notes.isEmpty()) View.VISIBLE else View.GONE
+        }
+    }
+
+    override fun onItemClick(note: Note) {
+        val intent = Intent(requireContext(), NoteDetailsActivity::class.java)
+        intent.putExtra("note", note)
+        startActivity(intent)
+    }
+
+    private fun showNoteOptions(note: Note) {
+        val options = arrayOf(
+            "Modifier",
+            if (note.isPinned) "Désépingler" else "Épingler",
+            if (note.isArchived) "Désarchiver" else "Archiver",
+            "Supprimer"
+        )
+
+        MaterialAlertDialogBuilder(requireContext())
+            .setTitle(note.title)
+            .setItems(options) { _, which ->
+                when (which) {
+                    0 -> onItemClick(note)
+                    1 -> togglePinned(note)
+                    2 -> toggleArchived(note)
+                    3 -> confirmDeleteNote(note)
+                }
             }
-        }
+            .show()
     }
 
-    private fun searchNote(query: String?){
-        val searchQuery = "%$query"
-
-        notesViewModel.searchNote(searchQuery).observe(this) {list ->
-            noteAdapter.differ.submitList(list)
-        }
+    private fun togglePinned(note: Note) {
+        noteViewModel.updateNote(note.copy(isPinned = !note.isPinned))
     }
 
-    override fun onQueryTextSubmit(p0: String?): Boolean {
-        return false
+    private fun toggleArchived(note: Note) {
+        noteViewModel.updateNote(note.copy(isArchived = !note.isArchived))
     }
 
-    override fun onQueryTextChange(newText: String?): Boolean {
-        if (newText != null){
-            searchNote(newText)
-        }
-        return true
+    private fun confirmDeleteNote(note: Note) {
+        MaterialAlertDialogBuilder(requireContext())
+            .setTitle("Supprimer la note")
+            .setMessage("Êtes-vous sûr de vouloir supprimer cette note ?")
+            .setPositiveButton("Supprimer") { _, _ ->
+                noteViewModel.deleteNote(note)
+            }
+            .setNegativeButton("Annuler", null)
+            .show()
     }
 
-    override fun onDestroy() {
-        super.onDestroy()
-        homeBinding = null
-    }
-
-    override fun onCreateMenu(menu: Menu, menuInflater: MenuInflater) {
-        menu.clear()
-        menuInflater.inflate(R.menu.home_menu, menu)
-
-        val menuSearch = menu.findItem(R.id.searchMenu).actionView as SearchView
-        menuSearch.isSubmitButtonEnabled = false
-        menuSearch.setOnQueryTextListener(this)
-    }
-
-    override fun onMenuItemSelected(menuItem: MenuItem): Boolean {
-        return false
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null
     }
 }

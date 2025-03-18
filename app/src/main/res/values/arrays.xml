@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="note_categories">
+        <item>Personnel</item>
+        <item>Travail</item>
+        <item>Courses</item>
+        <item>Idées</item>
+        <item>Projets</item>
+        <item>Divers</item>
+    </string-array>
+</resources> 

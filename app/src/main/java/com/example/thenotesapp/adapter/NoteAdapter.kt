@@ -2,50 +2,73 @@ package com.example.thenotesapp.adapter
 
 import android.view.LayoutInflater
 import android.view.ViewGroup
-import androidx.navigation.findNavController
-import androidx.recyclerview.widget.AsyncListDiffer
-import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
-import com.example.thenotesapp.databinding.NoteLayoutBinding
-import com.example.thenotesapp.fragments.HomeFragmentDirections
+import com.example.thenotesapp.databinding.ItemNoteBinding
 import com.example.thenotesapp.model.Note
+import android.view.View
+import com.example.thenotesapp.R
+import java.text.SimpleDateFormat
+import java.util.*
 
-class NoteAdapter : RecyclerView.Adapter<NoteAdapter.NoteViewHolder>() {
+class NoteAdapter(private val listener: OnItemClickListener) : RecyclerView.Adapter<NoteAdapter.NoteViewHolder>() {
+    private var notes = emptyList<Note>()
 
-    class NoteViewHolder(val itemBinding: NoteLayoutBinding): RecyclerView.ViewHolder(itemBinding.root)
-
-    private val differCallback = object : DiffUtil.ItemCallback<Note>(){
-        override fun areItemsTheSame(oldItem: Note, newItem: Note): Boolean {
-            return oldItem.id == newItem.id &&
-                    oldItem.noteDesc == newItem.noteDesc &&
-                    oldItem.noteTitle == newItem.noteTitle
+    inner class NoteViewHolder(private val binding: ItemNoteBinding) : RecyclerView.ViewHolder(binding.root) {
+        init {
+            binding.root.setOnClickListener {
+                val position = adapterPosition
+                if (position != RecyclerView.NO_POSITION) {
+                    listener.onItemClick(notes[position])
+                }
+            }
         }
 
-        override fun areContentsTheSame(oldItem: Note, newItem: Note): Boolean {
-            return oldItem == newItem
+        fun bind(note: Note) {
+            binding.apply {
+                noteTitle.text = note.title
+                noteContent.text = note.content
+                noteCategory.text = note.category
+                modifiedDate.text = formatDate(note.modifiedDate)
+                
+                // Gestion de l'indicateur de priorité
+                val priorityColor = when (note.priority) {
+                    0 -> R.color.priority_normal
+                    1 -> R.color.priority_important
+                    2 -> R.color.priority_urgent
+                    else -> R.color.priority_normal
+                }
+                priorityIndicator.setBackgroundResource(priorityColor)
+
+                // Gestion des indicateurs
+                pinIcon.visibility = if (note.isPinned) View.VISIBLE else View.GONE
+                reminderIndicator.visibility = if (note.reminderDate != null) View.VISIBLE else View.GONE
+                attachmentIndicator.visibility = if (note.hasAttachments) View.VISIBLE else View.GONE
+            }
+        }
+
+        private fun formatDate(date: Date): String {
+            val formatter = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
+            return "Modifié le ${formatter.format(date)}"
         }
     }
-    val differ = AsyncListDiffer(this, differCallback)
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): NoteViewHolder {
-        return NoteViewHolder(
-            NoteLayoutBinding.inflate(LayoutInflater.from(parent.context), parent, false)
-        )
-    }
-
-    override fun getItemCount(): Int {
-        return differ.currentList.size
+        val binding = ItemNoteBinding.inflate(LayoutInflater.from(parent.context), parent, false)
+        return NoteViewHolder(binding)
     }
 
     override fun onBindViewHolder(holder: NoteViewHolder, position: Int) {
-        val currentNote = differ.currentList[position]
+        holder.bind(notes[position])
+    }
 
-        holder.itemBinding.noteTitle.text = currentNote.noteTitle
-        holder.itemBinding.noteDesc.text = currentNote.noteDesc
+    override fun getItemCount() = notes.size
 
-        holder.itemView.setOnClickListener {
-            val direction = HomeFragmentDirections.actionHomeFragmentToEditNoteFragment(currentNote)
-            it.findNavController().navigate(direction)
-        }
+    fun setNotes(notes: List<Note>) {
+        this.notes = notes
+        notifyDataSetChanged()
+    }
+
+    interface OnItemClickListener {
+        fun onItemClick(note: Note)
     }
 }

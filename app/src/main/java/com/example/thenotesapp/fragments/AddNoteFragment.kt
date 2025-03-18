@@ -1,83 +1,91 @@
 package com.example.thenotesapp.fragments
 
 import android.os.Bundle
-import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
-import android.view.Menu
-import android.view.MenuInflater
-import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Toast
-import androidx.core.view.MenuHost
-import androidx.core.view.MenuProvider
-import androidx.lifecycle.Lifecycle
-import androidx.navigation.findNavController
-import com.example.thenotesapp.MainActivity
+import android.widget.ArrayAdapter
+import androidx.fragment.app.Fragment
+import androidx.lifecycle.ViewModelProvider
 import com.example.thenotesapp.R
 import com.example.thenotesapp.databinding.FragmentAddNoteBinding
-import com.example.thenotesapp.model.Note
-import com.example.thenotesapp.viewmodel.NoteViewModel
+import com.example.thenotesapp.viewmodels.NoteViewModel
 
-class AddNoteFragment : Fragment(R.layout.fragment_add_note), MenuProvider {
-
-    private var addNoteBinding: FragmentAddNoteBinding? = null
-    private val binding get() = addNoteBinding!!
-
-    private lateinit var notesViewModel: NoteViewModel
-    private lateinit var addNoteView: View
+class AddNoteFragment : Fragment() {
+    private var _binding: FragmentAddNoteBinding? = null
+    private val binding get() = _binding!!
+    private lateinit var noteViewModel: NoteViewModel
 
     override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
+        inflater: LayoutInflater,
+        container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
-        // Inflate the layout for this fragment
-        addNoteBinding = FragmentAddNoteBinding.inflate(inflater, container, false)
+    ): View {
+        _binding = FragmentAddNoteBinding.inflate(inflater, container, false)
         return binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        noteViewModel = ViewModelProvider(requireActivity())[NoteViewModel::class.java]
 
-        val menuHost: MenuHost = requireActivity()
-        menuHost.addMenuProvider(this, viewLifecycleOwner, Lifecycle.State.RESUMED)
-
-        notesViewModel = (activity as MainActivity).noteViewModel
-        addNoteView = view
+        setupSpinners()
+        setupListeners()
     }
 
-    private fun saveNote(view: View){
-        val noteTitle = binding.addNoteTitle.text.toString().trim()
-        val noteDesc = binding.addNoteDesc.text.toString().trim()
+    private fun setupSpinners() {
+        // Configuration du spinner de catégorie
+        val categories = resources.getStringArray(R.array.note_categories)
+        val categoryAdapter = ArrayAdapter(requireContext(), android.R.layout.simple_spinner_item, categories)
+        categoryAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+        binding.categoryAutoComplete.setAdapter(categoryAdapter)
+        binding.categoryAutoComplete.setText(categories[0], false)
 
-        if (noteTitle.isNotEmpty()){
-            val note = Note(0, noteTitle, noteDesc)
-            notesViewModel.addNote(note)
+        // Configuration du spinner de priorité
+        val priorities = arrayOf("Normale", "Importante", "Urgente")
+        val priorityAdapter = ArrayAdapter(requireContext(), android.R.layout.simple_spinner_item, priorities)
+        priorityAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+        binding.priorityAutoComplete.setAdapter(priorityAdapter)
+        binding.priorityAutoComplete.setText(priorities[0], false)
+    }
 
-            Toast.makeText(addNoteView.context, "Note Saved", Toast.LENGTH_SHORT).show()
-            view.findNavController().popBackStack(R.id.homeFragment, false)
-        } else {
-            Toast.makeText(addNoteView.context, "Please enter note title", Toast.LENGTH_SHORT).show()
+    private fun setupListeners() {
+        binding.addImageButton.setOnClickListener {
+            saveNote()
         }
     }
 
-    override fun onCreateMenu(menu: Menu, menuInflater: MenuInflater) {
-        menu.clear()
-        menuInflater.inflate(R.menu.menu_add_note, menu)
-    }
-
-    override fun onMenuItemSelected(menuItem: MenuItem): Boolean {
-        return when(menuItem.itemId){
-            R.id.saveMenu -> {
-                saveNote(addNoteView)
-                true
+    private fun saveNote() {
+        val title = binding.titleEditText.text.toString()
+        val content = binding.contentEditText.text.toString()
+        val category = binding.categoryAutoComplete.text.toString()
+        val priority = binding.priorityAutoComplete.text.toString().let { text ->
+            when (text) {
+                "Normale" -> 0
+                "Importante" -> 1
+                "Urgente" -> 2
+                else -> 0
             }
-            else -> false
         }
+
+        if (title.isBlank()) {
+            binding.titleEditText.error = "Le titre est requis"
+            return
+        }
+
+        noteViewModel.insertNote(
+            title = title,
+            content = content,
+            category = category,
+            priority = priority
+        )
+
+        // Retour au fragment précédent
+        requireActivity().onBackPressed()
     }
 
-    override fun onDestroy() {
-        super.onDestroy()
-        addNoteBinding = null
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null
     }
 }
